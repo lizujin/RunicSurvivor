@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3305f6c152dd0444eabbe8455faddc5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 0
   enemyName: "\u7CBE\u7EC6\u9B3C"
   maxHealth: 50
   health: 50
@@ -153,8 +154,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 518ded92e5dbf494e8f76a74d752272e, type: 3}
-  m_Color: {r: 1, g: 0.99578243, b: 0.7311321, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 730aaae60355142339dc27829ed7839b, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
