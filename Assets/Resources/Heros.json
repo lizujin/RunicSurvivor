@@ -1,0 +1,84 @@
+{
+  "heros": [
+    {
+      "name": "孙悟空",
+      "cost": 5,
+      "icon": "Icons/sunwukong",
+      "prefab": "Prefabs/Characters/hero/sunwukong",
+      "race": "星辰",
+      "classType": "凶残"
+    },
+    {
+      "name": "唐僧",
+      "cost": 1,
+      "icon": "Icons/tangseng",
+      "prefab": "Prefabs/Characters/hero/tangseng",
+      "race": "光明",
+      "classType": "善良"
+    },
+    {
+      "name": "猪八戒",
+      "cost": 1,
+      "icon": "Icons/zhubajie",
+      "prefab": "Prefabs/Characters/hero/zhubajie",
+      "race": "暗夜",
+      "classType": "狂野"
+    },
+    {
+      "name": "沙僧",
+      "cost": 2,
+      "icon": "Icons/shaseng",
+      "prefab": "Prefabs/Characters/hero/shaseng",
+      "race": "星辰",
+      "classType": "善良"
+    },
+    {
+      "name": "红孩儿",
+      "cost": 3,
+      "icon": "Icons/honghaier",
+      "prefab": "Prefabs/Characters/hero/honghaier",
+      "race": "暗夜",
+      "classType": "凶残"
+    },
+    {
+      "name": "白龙马",
+      "cost": 2,
+      "icon": "Icons/bailongma",
+      "prefab": "Prefabs/Characters/hero/bailongma",
+      "race": "光明",
+      "classType": "极速"
+    },
+    {
+      "name": "观音菩萨",
+      "cost": 5,
+      "icon": "Icons/guanyinpusa",
+      "prefab": "Prefabs/Characters/hero/guanyinpusa",
+      "race": "光明",
+      "classType": "治愈"
+    },
+    {
+      "name": "牛魔王",
+      "cost": 4,
+      "icon": "Icons/niumowang",
+      "prefab": "Prefabs/Characters/hero/niumowang",
+      "race": "暗夜",
+      "classType": "狂野"
+    },
+    {
+      "name": "铁扇公主",
+      "cost": 3,
+      "icon": "Icons/tieshangongzhu",
+      "prefab": "Prefabs/Characters/hero/tieshangongzhu",
+      "race": "星辰",
+      "classType": "极速"
+    },
+    {
+      "name": "如来佛祖",
+      "cost": 5,
+      "icon": "Icons/rulaifozu",
+      "prefab": "Prefabs/Characters/hero/rulaifozu",
+      "race": "光明",
+      "classType": "生长"
+    }
+  ]
+}

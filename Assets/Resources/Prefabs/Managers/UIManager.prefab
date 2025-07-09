@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &453429760668651220
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2871080928821164936}
+  - component: {fileID: 8245111637318938030}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2871080928821164936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453429760668651220}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8245111637318938030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453429760668651220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c02de57ec2e854491a9a9f8cbf38b072, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameplayPanel: {fileID: 6546039959107765858, guid: 7b7ef84d11f58421d9054eb190cd77a5, type: 3}
+  shopPrefab: {fileID: 2430894645640538787, guid: face7107cb72f417b8395278521f7153, type: 3}
+  pausePanel: {fileID: 0}
+  gameOverPanel: {fileID: 6546039959107765858, guid: de51fee588d314d26ba722b35c0167a4, type: 3}
+  winUIPrefab: {fileID: 6546039959107765858, guid: 1f03b035eec3d4485a363858a7ff674c, type: 3}
+  tutorialPanel: {fileID: 0}
+  synergyPanel: {fileID: 0}
+  startPanelPrefab: {fileID: 6546039959107765858, guid: 2dca55d6fd66e4f1583ff583b5ef464c, type: 3}
+  uiRoot: {fileID: 0}
+  teamInfoContainer: {fileID: 0}
+  characterInfoPrefab: {fileID: 0}
+  messageBox: {fileID: 0}
+  messageText: {fileID: 0}
+  messageDuration: 3
+  raceContainer: {fileID: 0}
+  factionContainer: {fileID: 0}
+  synergyItemPrefab: {fileID: 0}
+  waveStartBanner: {fileID: 0}
+  waveStartText: {fileID: 0}
+  waveEndBanner: {fileID: 0}
+  waveEndText: {fileID: 0}
+  gameOverTitleText: {fileID: 0}
+  gameOverStatsText: {fileID: 0}
+  restartButton: {fileID: 0}
+  mainMenuButton: {fileID: 0}
+  centerSkillIcon: {fileID: 0}
+  skillCooldownOverlay: {fileID: 0}
