@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1686778544150232370}
+  - component: {fileID: 8204063107916377653}
   - component: {fileID: 1203123318239720157}
-  - component: {fileID: -8991034624706256989}
+  - component: {fileID: -5706849347175023637}
   m_Layer: 7
   m_Name: "\u7CBE\u7EC6\u9B3C"
   m_TagString: Untagged
@@ -18,8 +18,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1686778544150232370
-Transform:
+--- !u!224 &8204063107916377653
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -34,6 +34,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 1, y: 1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1203123318239720157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65,7 +70,7 @@ MonoBehaviour:
   attackCooldown: 2
   wanderRadius: 5
   wanderTimer: 5
---- !u!58 &-8991034624706256989
+--- !u!58 &-5706849347175023637
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -107,10 +112,10 @@ Transform:
   m_GameObject: {fileID: 8324227123169145043}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1686778544150232370}
+  m_Father: {fileID: 8204063107916377653}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5646601027049938183
