@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
-  characterName: "\u753B\u7B14"
+  characterName: "\u725B\u5934\u4EBA"
   description: "\u89D2\u8272\u63CF\u8FF0"
   race: 3
   faction: 5

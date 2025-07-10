@@ -1,4 +1,6 @@
 Library/
 .DS_Store
 Temp/
-
+Logs/
+obj/
+.idea/

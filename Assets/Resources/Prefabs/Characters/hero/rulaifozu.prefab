@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 0
-  characterName: "\u91D1\u9488"
+  characterName: "\u72C2\u6218\u58EB"
   description: "\u89D2\u8272\u63CF\u8FF0"
   race: 3
   faction: 2

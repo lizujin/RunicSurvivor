@@ -122,7 +122,7 @@ namespace SimpleSystem {
         private void CreateSkillEffect(BaseEntity source, int effectId, Vector3 pos)
         {
             Debug.Log("SkillSystem: 创建技能特效 " + effectId);
-            var path = "Skill/Effect/" + effectId;
+            var path = "Prefabs/Skill/Effect/" + effectId;
             var effect = ObjectPool.Instance.GetPrefabInstance(path);
             var root = GameManager.Instance.EffectRoot;
             effect.transform.SetParent(root);

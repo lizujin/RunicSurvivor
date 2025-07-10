@@ -8,10 +8,17 @@ namespace SimpleSystem.Utils
     public class ObjectPool
     {
         private static ObjectPool _instance;
+        private Transform poolRoot;
         public static ObjectPool Instance
         {
             get
             {
+                if (_instance == null)
+                {
+                    _instance = new ObjectPool();
+                    _instance.poolRoot = GameObject.Find("PoolRoot").transform;
+                }
+
                 return _instance ?? (_instance = new ObjectPool());
             }
         }
@@ -34,16 +41,15 @@ namespace SimpleSystem.Utils
                 return _pool[key].Dequeue() as T;
             }
 
-            return new T();
+            return default;
         }
 
-        public void Recycle(string key, object obj)
+        public void Recycle(string key, GameObject obj)
         {
             if (!_pool.ContainsKey(key))
             {
                 _pool[key] = new Queue<object>();
             }
-
             _pool[key].Enqueue(obj);
         }
 
@@ -55,7 +61,7 @@ namespace SimpleSystem.Utils
         public GameObject GetPrefabInstance(string path)
         {
             var ret = Get<GameObject>(path);
-            if (ret == null)
+            if (ret == default || ret == null)
             {
                 var prefab = Resources.Load<GameObject>(path);
                 if (prefab == null)
@@ -65,11 +71,15 @@ namespace SimpleSystem.Utils
                 }
                 ret = GameObject.Instantiate(prefab);
             }
+            ret.SetActive(true);
             return ret;
         }
 
         public void RecyclePrefabInstance(string key, GameObject obj)
         {
+            obj.transform.SetParent(poolRoot);
+            obj.SetActive(false);
+            obj.transform.localPosition = Vector3.zero;
             Recycle(key, obj);
         }
     }
