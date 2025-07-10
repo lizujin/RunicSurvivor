@@ -31,7 +31,7 @@ namespace SimpleSystem {
                         if (skillContent.CDLeftTime <= 0){
                             skillContent.state = ESkillState.None;
                         }
-                        CastSkill(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target);
+                        // CastSkill(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target);
                     } else if (skillContent.state == ESkillState.Casting){
                         skillContent.CastTime = skillContent.CastTime + delta;
                         if (skillConfig.durationType == ESkillDurationType.Time && skillConfig.durationValue <= skillContent.CastTime){
@@ -139,7 +139,7 @@ namespace SimpleSystem {
                 skillContent.CastCount = skillContent.CastCount + 1;
                 if(skillContent.CastCount >= skillConfig.durationValue){
                     skillContent.state = ESkillState.Cooling;
-                    Debug.Log("SkillSystem: 技能结束 " + skillConfig.name);
+                    Debug.Log("SkillSystem: 技能结束 进入冷却" + skillConfig.name);
                 }
             }
         }
@@ -190,7 +190,7 @@ namespace SimpleSystem {
             }
             switch(skillConfig.targetSelectType){
                 case ESkillTargetSelectType.Nearest:
-                    ret = GetNearestTargets(source, skillConfig);
+                    GetNearestTargets(source, skillConfig, ref ret);
                     break;
                 case ESkillTargetSelectType.Random:
                     ret = GetRandomTargets(source, skillConfig);
@@ -211,15 +211,9 @@ namespace SimpleSystem {
             return ret;
         }
 
-        private List<BaseEntity> GetNearestTargets(BaseEntity source, SkillConfig skillConfig)
+        private bool GetNearestTargets(BaseEntity source, SkillConfig skillConfig, ref List<BaseEntity> enemies)
         {
-            List<Enemy> enemies = World.GetInstance().GetNearestEnemies(source, skillConfig.shapeRadius, skillConfig.targetNum);
-            List<BaseEntity> ret = new List<BaseEntity>();
-            foreach (var e in enemies)
-            {
-                ret.Add(e);
-            }
-            return ret;
+            return World.GetInstance().GetNearestEnemies(source, ref enemies, skillConfig.shapeRadius, skillConfig.targetNum);
         }
         
         private List<BaseEntity> GetRandomTargets(BaseEntity source, SkillConfig skillConfig){
@@ -280,12 +274,12 @@ namespace SimpleSystem {
         private void ApplyEffectValue(BaseEntity source, SkillConfig skillConfig, BaseEntity target, float effectValue){
             var type = target.GetType();
             if (skillConfig.caleType == ESkillCaleType.Add){
-                var method = type.GetMethod("Add" + skillConfig.valueMaxType);
+                var method = type.GetMethod("Add" + skillConfig.targetProperty);
                 if (method == null){
-                    Debug.LogError("ApplyEffectValue: " + skillConfig.valueMaxType + " not found");
+                    Debug.LogError("ApplyEffectValue: " + skillConfig.targetProperty + " not found");
                     return;
                 }
-                method.Invoke(target, new object[] { effectValue });
+                method.Invoke(target, new object[] { effectValue, source, skillConfig });
             }
             else if (skillConfig.caleType == ESkillCaleType.Mul){
                 var method = type.GetMethod("Mul" + skillConfig.valueMaxType);
@@ -293,7 +287,7 @@ namespace SimpleSystem {
                     Debug.LogError("ApplyEffectValue: " + skillConfig.valueMaxType + " not found");
                     return;
                 }
-                method.Invoke(target, new object[] { effectValue });
+                method.Invoke(target, new object[] { effectValue , source, skillConfig});
             }
             else{
                 Debug.LogError("ApplyEffectValue: " + skillConfig.caleType + " not found");

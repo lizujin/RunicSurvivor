@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SimpleSystem;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -723,11 +724,14 @@ public class EnemyManager : MonoBehaviour
     /// <summary>
     /// 获取距离玩家最近的敌人
     /// </summary>
-    public List<Enemy> GetNearestEnemies(Vector3 position, float maxDistance = float.MaxValue, int count = 1)
+    public bool GetNearestEnemies(Vector3 position, ref List<BaseEntity> nearestEnemies, float maxDistance = float.MaxValue,int count = 1)
     {
         CleanupDeadEnemies();
-        
-        List<Enemy> nearestEnemies = new List<Enemy>();
+        if (nearestEnemies == null)
+        {
+            return false;
+        }
+
         float[] nearestDistance = new float[count];
         int foundIndex = 0;
         foreach (Enemy enemy in activeEnemies)
@@ -744,7 +748,7 @@ public class EnemyManager : MonoBehaviour
                 if (nearestDistance[foundIndex] == 0 && foundIndex < (count - 1))
                 {
                     nearestDistance[foundIndex] = distance;
-                    nearestEnemies[foundIndex] = enemy;
+                    nearestEnemies.Add(enemy);
                     foundIndex++;
                 }
 
@@ -773,7 +777,7 @@ public class EnemyManager : MonoBehaviour
                 }
             }
         }
-        return nearestEnemies;
+        return true;
     }
 
     

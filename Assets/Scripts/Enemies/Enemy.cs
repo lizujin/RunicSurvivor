@@ -869,4 +869,9 @@ public class Enemy : BaseEntity
         health = maxHealth;
         attackDamage *= damageMultiplier;
     }
+
+    public void AddDamage(float value, BaseEntity source, SkillConfig skillConfig)
+    {
+        TakeDamage(value);
+    }
 }

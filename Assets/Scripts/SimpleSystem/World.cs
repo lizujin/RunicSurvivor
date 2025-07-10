@@ -35,14 +35,14 @@ namespace SimpleSystem
             }
         }
 
-        public List<Enemy> GetNearestEnemies(BaseEntity character, float radius, int count)
+        public bool GetNearestEnemies(BaseEntity character, ref List<BaseEntity> enemies, float radius, int count)
         {
             var mgr = GameManager.Instance.GetEnemyManager();
             if (mgr)
             {
-                return mgr.GetNearestEnemies(character.transform.position, radius, count);
+                return mgr.GetNearestEnemies(character.transform.position,ref enemies, radius, count);
             }
-            return null;
+            return false;
         }
 
         public void AddSystem(BaseSystem system){
