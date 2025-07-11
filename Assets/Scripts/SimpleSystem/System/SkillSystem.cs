@@ -1,5 +1,5 @@
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using SimpleSystem.Utils;
 using UnityEngine;
 
@@ -9,11 +9,14 @@ namespace SimpleSystem {
     {
         private List<SkillComponent> _skillComponents = new List<SkillComponent>();
 
+        private BaseSystemMono _mono;
         // 技能初始化
-        public void Init(){
+        override public void Init(){
         }
 
-        public void Start(){
+        override public void Start()
+        {
+            _mono = GameManager.Instance.EffectRoot.gameObject.AddComponent<BaseSystemMono>();
         }
 
         // 技能更新
@@ -27,20 +30,24 @@ namespace SimpleSystem {
                         break;
                     }
                     if (skillContent.state == ESkillState.Cooling){
-                        skillContent.CDLeftTime = skillContent.CDLeftTime - delta;
+                        skillContent.CDLeftTime -= delta;
                         if (skillContent.CDLeftTime <= 0){
+                            Debug.Log("SkillSystem: 技能冷却结束，重新释放技能" + skillConfig.name);
                             skillContent.state = ESkillState.None;
+                            _mono.StartCoroutine(CastSkill(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target));
                         }
-                        // CastSkill(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target);
                     } else if (skillContent.state == ESkillState.Casting){
-                        skillContent.CastTime = skillContent.CastTime + delta;
-                        if (skillConfig.durationType == ESkillDurationType.Time && skillConfig.durationValue <= skillContent.CastTime){
-                            skillContent.state = ESkillState.Cooling;
-                            skillContent.CDLeftTime = skillConfig.CD;
-                        }
-                        skillContent.CastIntervalLeftTime = skillContent.CastIntervalLeftTime - delta;
-                        if (skillContent.CastIntervalLeftTime <= 0){
-                            CastSkill(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target);
+                        if (skillConfig.durationType == ESkillDurationType.Time)
+                        {
+                            skillContent.CastTime = skillContent.CastTime + delta;
+                            if (skillConfig.durationType == ESkillDurationType.Time && skillConfig.durationValue <= skillContent.CastTime){
+                                skillContent.state = ESkillState.Cooling;
+                                skillContent.CDLeftTime = skillConfig.CD;
+                                Debug.Log("SkillSystem: 技能持续时间到， 进入冷却" + skillConfig.name);
+                            }
+                        } else if (skillConfig.durationType == ESkillDurationType.Times)
+                        {
+                            CheckSkillCast(skillContent.source, skillConfig, skillContent, skillContent.position, skillContent.target);
                         }
                     }
                 }
@@ -70,15 +77,30 @@ namespace SimpleSystem {
                 skillContent.target = target;
                 skillContent.source = source;
                 if (skillConfig.id != 0 && skillContent.state == ESkillState.None){
-                    CastSkill(source, skillConfig, skillContent, position, target);
+                    _mono.StartCoroutine(CastSkill(source, skillConfig, skillContent, position, target));
                 }
             }
         }
         
-        public async Task<bool> CastSkill(BaseEntity source, SkillConfig skillConfig, SkillContent skillContent, Vector3 position = default, BaseEntity target = null){
-            PlaySkillAnimation(source, skillConfig.startAnimation);
-            await Task.Delay((int)(skillConfig.preDelay * 1000));
-            CreateSkillShape(source, skillConfig);
+        public IEnumerator CastSkill(BaseEntity source, SkillConfig skillConfig, SkillContent skillContent, Vector3 position = default, BaseEntity target = null){
+            if (skillContent.state == ESkillState.None)
+            {
+                Debug.Log("SkillSystem: 开始释放技能" + skillConfig.name);
+                PlaySkillAnimation(source, skillConfig.startAnimation);
+                yield return new WaitForSeconds(skillConfig.preDelay);
+                CreateSkillShape(source, skillConfig);
+                skillContent.state = ESkillState.Casting;
+            } else if (skillContent.state != ESkillState.Casting)
+            {
+                Debug.Log("SkillSystem: 当前状态不是None状态" + skillContent.state);
+                yield break;
+            }
+            CheckSkillCast(source, skillConfig, skillContent, position, target);
+        }
+
+        private bool CheckSkillCast(BaseEntity source, SkillConfig skillConfig, SkillContent skillContent,
+            Vector3 position = default, BaseEntity target = null)
+        {
             var targets = new List<BaseEntity>();
             if (target != null){
                 targets.Add(source);
@@ -86,29 +108,25 @@ namespace SimpleSystem {
             else{
                 targets = GetTargets(source, skillConfig, target);
             }
-
-            if (skillContent.state == ESkillState.None)
-            {
-                skillContent.state = ESkillState.Casting;
-            }
-
             if (targets.Count == 0){
                 return false;
             }
+            _mono.StartCoroutine(DoCastSkill(source, skillConfig, skillContent, targets));
+            return true;
+        }
+
+        private IEnumerator DoCastSkill(BaseEntity source, SkillConfig skillConfig, SkillContent skillContent,
+             List<BaseEntity> targets)
+        {
             Debug.Log("SkillSystem: 释放技能 " + skillConfig.name + "目标数量：" + targets.Count);
-            if (position != default)
-            {
-                CreateSkillEffect(source, skillConfig.effectId, position);
-            }
+            AfterCastSkill(source, skillConfig, targets, skillContent);
             foreach (var t in targets){
                 var effectValue = GetEffectValue(source, skillConfig, t);
                 ApplyEffectValue(source, skillConfig, t, effectValue);
                 var pos = t.transform.position;
-                CreateSkillEffect(source, skillConfig.effectId, t.transform.position);
-                await Task.Delay((int)(skillConfig.intervalValue * 1000));
+                CreateSkillEffect(source, skillConfig.effectId, pos);
+                yield return new WaitForSeconds(skillConfig.intervalValue);
             }
-            AfterCastSkill(source, skillConfig, targets, skillContent);
-            return true;
         }
 
         private bool CreateSkillShape(BaseEntity source, SkillConfig skillConfig){
@@ -139,6 +157,7 @@ namespace SimpleSystem {
                 skillContent.CastCount = skillContent.CastCount + 1;
                 if(skillContent.CastCount >= skillConfig.durationValue){
                     skillContent.state = ESkillState.Cooling;
+                    skillContent.CDLeftTime = skillConfig.CD;
                     Debug.Log("SkillSystem: 技能结束 进入冷却" + skillConfig.name);
                 }
             }

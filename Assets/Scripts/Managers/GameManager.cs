@@ -120,8 +120,6 @@ public class GameManager : MonoBehaviour
     
     private void Start()
     {
-        // 初始化世界
-        World.GetInstance().Start();
     }
     
     private void Update()

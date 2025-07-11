@@ -11,7 +11,7 @@ namespace Utils
         public string CollectKey;
         private float _time = 0;
         private ObjectPool objectPool;
-        public void Start()
+        public void OnEnable()
         {
             objectPool = ObjectPool.Instance;
             StartCoroutine(CollectObj());

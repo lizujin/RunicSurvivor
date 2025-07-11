@@ -1,9 +1,7 @@
 // 本文件完全有AI生成
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Assets.Scripts.Skills;
 using Assets.Scripts.Managers;
+using SimpleSystem;
 
 /// <summary>
 /// 游戏控制器，负责协调各个管理器和初始化游戏
@@ -56,7 +54,7 @@ public class GameController : MonoBehaviour
             gameManager = gameManagerObj.AddComponent<GameManager>();
             gameManager.difficulty = initialDifficulty;
         }
-        
+        World.GetInstance().Start();
         // 创建EnemyManager
         if (enemyManager == null)
         {
