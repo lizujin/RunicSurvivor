@@ -85,6 +85,7 @@ public class Enemy : BaseEntity
         // 设置初始值
         health = maxHealth;
         currentWanderTimer = wanderTimer;
+        moveSpeed += Random.Range(0, 0.5f);
     }
     
     protected virtual void Start()

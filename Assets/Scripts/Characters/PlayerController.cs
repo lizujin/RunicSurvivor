@@ -23,8 +23,8 @@ public class PlayerController : MonoBehaviour
     [Header("状态")]
     public bool invulnerable = false;
     public float invulnerabilityTime = 1f;
-    public float currentHealth = 100f;
-    public float maxHealth = 100f;
+    public float currentHealth = 300;
+    public float maxHealth = 300;
     
     // 内部变量
     private List<Character> teamMembers = new List<Character>();

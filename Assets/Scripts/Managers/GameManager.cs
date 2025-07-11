@@ -86,6 +86,11 @@ public class GameManager : MonoBehaviour
     private Transform _effectRoot;
     public Transform EffectRoot => _effectRoot;
 
+    public int GetEnemyNumberPerWave(int wave)
+    {
+        return (wave - 1) * 20 + 20;
+    }
+
     private void Awake()
     {
         _playerRoot = GameObject.Find("PlayerRoot").transform;
@@ -104,7 +109,7 @@ public class GameManager : MonoBehaviour
         // 初始化升级经验要求 - 波数*5
         for (int i = 0; i < expRequiredForLevel.Length; i++)
         {
-            expRequiredForLevel[i] = (i) * 5;
+            expRequiredForLevel[i] = GetEnemyNumberPerWave(i);
         }
         
         // 初始化金币奖励 - 线性增长从2到6

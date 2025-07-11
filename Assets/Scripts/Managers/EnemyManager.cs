@@ -226,9 +226,8 @@ public class EnemyManager : MonoBehaviour
         WaveConfig config = new WaveConfig();
         config.waveNumber = waveNumber;
         
-        // 计算敌人总数 - 按照 (波数-1)*5 + 5 的公式递增
-        // 即从第一波的5个敌人开始，每波递增5个
-        config.totalEnemies = (waveNumber - 1) * 5 + 5;
+        // 计算敌人总数 - 按照 (波数-1)*20 + 5 的公式递增
+        config.totalEnemies = GameManager.Instance.GetEnemyNumberPerWave(waveNumber);
         
         // 检查是否Boss波次
         config.isBossWave = (waveNumber % bossWaveInterval == 0);
@@ -812,14 +811,15 @@ public class EnemyManager : MonoBehaviour
     private void CreateDefaultSpawnPoints()
     {
         Debug.Log("创建默认敌人生成点");
-        
+        float r = 5f;
         // 创建默认生成点
-        spawnPoints = new Transform[4];
-        for (int i = 0; i < 4; i++)
+        int count = 20;
+        spawnPoints = new Transform[count];
+        for (int i = 0; i < count; i++)
         {
             GameObject spawnPointObj = new GameObject($"SpawnPoint_{i}");
             float angle = i * 90f * Mathf.Deg2Rad;
-            spawnPointObj.transform.position = new Vector3(Mathf.Cos(angle) * 20f, Mathf.Sin(angle) * 20f, 0);
+            spawnPointObj.transform.position = new Vector3(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r, 0);
             spawnPoints[i] = spawnPointObj.transform;
             spawnPointObj.transform.parent = transform;
         }

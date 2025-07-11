@@ -125,8 +125,9 @@ namespace SimpleSystem {
                 ApplyEffectValue(source, skillConfig, t, effectValue);
                 var pos = t.transform.position;
                 CreateSkillEffect(source, skillConfig.effectId, pos);
-                yield return new WaitForSeconds(skillConfig.intervalValue);
+                // yield return new WaitForSeconds(skillConfig.intervalValue);
             }
+            yield break;
         }
 
         private bool CreateSkillShape(BaseEntity source, SkillConfig skillConfig){
