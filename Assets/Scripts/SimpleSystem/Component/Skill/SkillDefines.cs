@@ -56,9 +56,7 @@ namespace SimpleSystem{
 
     public enum ESkillMoveTargetType{
         None = 0,
-        Line = 1,
-        Circle = 2,
-        Flow = 3,
+        LineCircle = 3,
     }
 
     public enum ESkillState{

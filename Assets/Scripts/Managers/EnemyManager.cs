@@ -36,6 +36,15 @@ public class EnemyManager : MonoBehaviour
     [Header("波次间隔")]
     public float timeBetweenWaves = 3f;        // 波次之间的间隔时间
     
+    [Header("防重叠配置")]
+    public float gridSize = 1.5f;              // 网格大小
+    public int maxEnemiesPerGrid = 3;          // 每个网格最大敌人数
+    public float minEnemyDistance = 1.0f;      // 敌人之间的最小距离
+    public int maxSpawnAttempts = 10;          // 最大生成尝试次数
+    public bool enableDynamicAvoidance = true; // 启用动态避让
+    public float avoidanceStrength = 2.0f;     // 避让强度
+    public float avoidanceRadius = 2.0f;       // 避让半径
+    
     // 波次状态
     private int currentWave = 0;
     private int enemiesRemaining = 0;
@@ -51,6 +60,16 @@ public class EnemyManager : MonoBehaviour
     
     // 波次配置
     private WaveConfig currentWaveConfig;
+    
+    // 空间分区系统
+    private Dictionary<Vector2Int, List<Enemy>> spatialGrid = new Dictionary<Vector2Int, List<Enemy>>();
+    private Vector2 worldBoundsMin = new Vector2(-50f, -50f);
+    private Vector2 worldBoundsMax = new Vector2(50f, 50f);
+    
+    // 动态避让系统
+    private Dictionary<Enemy, Vector2> enemyAvoidanceForces = new Dictionary<Enemy, Vector2>();
+    private float lastGridUpdateTime = 0f;
+    private float gridUpdateInterval = 0.5f; // 网格更新间隔
     
     // 波次开始/结束事件
     public delegate void WaveSpawnCompleteHandler(int waveNumber);
@@ -90,6 +109,188 @@ public class EnemyManager : MonoBehaviour
         if (playerController == null)
         {
             Debug.LogWarning("未找到PlayerController，将使用默认敌人分配");
+        }
+        
+        // 初始化空间分区系统
+        InitializeSpatialGrid();
+    }
+    
+    /// <summary>
+    /// 初始化空间分区网格
+    /// </summary>
+    private void InitializeSpatialGrid()
+    {
+        spatialGrid.Clear();
+        
+        // 计算网格数量
+        int gridCountX = Mathf.CeilToInt((worldBoundsMax.x - worldBoundsMin.x) / gridSize);
+        int gridCountY = Mathf.CeilToInt((worldBoundsMax.y - worldBoundsMin.y) / gridSize);
+        
+        Debug.Log($"初始化空间分区网格: {gridCountX}x{gridCountY}, 网格大小: {gridSize}");
+    }
+    
+    /// <summary>
+    /// 世界坐标转换为网格坐标
+    /// </summary>
+    private Vector2Int WorldToGrid(Vector3 worldPosition)
+    {
+        int gridX = Mathf.FloorToInt((worldPosition.x - worldBoundsMin.x) / gridSize);
+        int gridY = Mathf.FloorToInt((worldPosition.y - worldBoundsMin.y) / gridSize);
+        return new Vector2Int(gridX, gridY);
+    }
+    
+    /// <summary>
+    /// 网格坐标转换为世界坐标
+    /// </summary>
+    private Vector3 GridToWorld(Vector2Int gridPos)
+    {
+        float worldX = worldBoundsMin.x + (gridPos.x + 0.5f) * gridSize;
+        float worldY = worldBoundsMin.y + (gridPos.y + 0.5f) * gridSize;
+        return new Vector3(worldX, worldY, 0);
+    }
+    
+    /// <summary>
+    /// 检查位置是否适合生成敌人
+    /// </summary>
+    private bool IsValidSpawnPosition(Vector3 position)
+    {
+        // 检查是否在世界边界内
+        if (position.x < worldBoundsMin.x || position.x > worldBoundsMax.x ||
+            position.y < worldBoundsMin.y || position.y > worldBoundsMax.y)
+        {
+            return false;
+        }
+        
+        // 检查网格密度
+        Vector2Int gridPos = WorldToGrid(position);
+        if (!spatialGrid.ContainsKey(gridPos))
+        {
+            spatialGrid[gridPos] = new List<Enemy>();
+        }
+        
+        if (spatialGrid[gridPos].Count >= maxEnemiesPerGrid)
+        {
+            return false;
+        }
+        
+        // 检查与现有敌人的距离
+        foreach (Enemy enemy in activeEnemies)
+        {
+            if (enemy != null && enemy.IsAlive)
+            {
+                float distance = Vector3.Distance(position, enemy.transform.position);
+                if (distance < minEnemyDistance)
+                {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /// <summary>
+    /// 查找有效的生成位置
+    /// </summary>
+    private Vector3? FindValidSpawnPosition(Transform baseSpawnPoint)
+    {
+        Vector3 basePosition = baseSpawnPoint.position;
+        
+        // 首先尝试在基础位置生成
+        if (IsValidSpawnPosition(basePosition))
+        {
+            return basePosition;
+        }
+        
+        // 在基础位置周围寻找有效位置
+        for (int attempt = 1; attempt <= maxSpawnAttempts; attempt++)
+        {
+            // 使用螺旋搜索模式
+            float radius = attempt * gridSize * 0.5f;
+            float angle = attempt * 137.5f * Mathf.Deg2Rad; // 黄金角螺旋
+            
+            Vector3 offset = new Vector3(
+                Mathf.Cos(angle) * radius,
+                Mathf.Sin(angle) * radius,
+                0
+            );
+            
+            Vector3 testPosition = basePosition + offset;
+            
+            if (IsValidSpawnPosition(testPosition))
+            {
+                return testPosition;
+            }
+        }
+        
+        // 如果找不到合适的位置，尝试在更远的网格中寻找
+        Vector2Int baseGrid = WorldToGrid(basePosition);
+        for (int gridDistance = 1; gridDistance <= 3; gridDistance++)
+        {
+            for (int dx = -gridDistance; dx <= gridDistance; dx++)
+            {
+                for (int dy = -gridDistance; dy <= gridDistance; dy++)
+                {
+                    Vector2Int testGrid = baseGrid + new Vector2Int(dx, dy);
+                    Vector3 testPosition = GridToWorld(testGrid);
+                    
+                    if (IsValidSpawnPosition(testPosition))
+                    {
+                        return testPosition;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 将敌人添加到空间网格
+    /// </summary>
+    private void AddEnemyToGrid(Enemy enemy)
+    {
+        Vector2Int gridPos = WorldToGrid(enemy.transform.position);
+        
+        if (!spatialGrid.ContainsKey(gridPos))
+        {
+            spatialGrid[gridPos] = new List<Enemy>();
+        }
+        
+        spatialGrid[gridPos].Add(enemy);
+    }
+    
+    /// <summary>
+    /// 从空间网格中移除敌人
+    /// </summary>
+    private void RemoveEnemyFromGrid(Enemy enemy)
+    {
+        Vector2Int gridPos = WorldToGrid(enemy.transform.position);
+        
+        if (spatialGrid.ContainsKey(gridPos))
+        {
+            spatialGrid[gridPos].Remove(enemy);
+        }
+    }
+    
+    /// <summary>
+    /// 清理空网格
+    /// </summary>
+    private void CleanupEmptyGrids()
+    {
+        List<Vector2Int> emptyGrids = new List<Vector2Int>();
+        
+        foreach (var kvp in spatialGrid)
+        {
+            if (kvp.Value.Count == 0)
+            {
+                emptyGrids.Add(kvp.Key);
+            }
+        }
+        
+        foreach (Vector2Int gridPos in emptyGrids)
+        {
+            spatialGrid.Remove(gridPos);
         }
     }
     
@@ -547,12 +748,20 @@ public class EnemyManager : MonoBehaviour
         Transform spawnPoint = GetRandomSpawnPoint();
         if (spawnPoint == null) return;
         
+        // 查找有效的生成位置
+        Vector3? validPosition = FindValidSpawnPosition(spawnPoint);
+        if (!validPosition.HasValue)
+        {
+            Debug.LogWarning($"无法为敌人找到有效的生成位置，跳过生成");
+            return;
+        }
+        
         // 获取对应类型的敌人预制体
         GameObject enemyPrefab = GetEnemyPrefab(spawnType);
         if (enemyPrefab == null) return;
         
         // 实例化敌人
-        GameObject enemyObj = Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
+        GameObject enemyObj = Instantiate(enemyPrefab, validPosition.Value, Quaternion.identity);
         Enemy enemy = enemyObj.GetComponent<Enemy>();
         
         if (enemy != null)
@@ -577,8 +786,9 @@ public class EnemyManager : MonoBehaviour
             // 设置敌人属性
             enemy.SetStats(healthMultiplier, damageMultiplier);
             
-            // 添加到活跃敌人列表
+            // 添加到活跃敌人列表和空间网格
             activeEnemies.Add(enemy);
+            AddEnemyToGrid(enemy);
             enemiesAlive++;
             
             // 监听敌人死亡
@@ -663,6 +873,7 @@ public class EnemyManager : MonoBehaviour
         if (enemy != null && activeEnemies.Contains(enemy))
         {
             activeEnemies.Remove(enemy);
+            RemoveEnemyFromGrid(enemy);
             enemiesAlive--;
         }
     }
@@ -678,9 +889,11 @@ public class EnemyManager : MonoBehaviour
             if (enemy == null || !enemy.IsAlive)
             {
                 activeEnemies.RemoveAt(i);
+                RemoveEnemyFromGrid(enemy);
                 enemiesAlive--;
             }
         }
+        CleanupEmptyGrids();
     }
     
     /// <summary>
@@ -822,6 +1035,145 @@ public class EnemyManager : MonoBehaviour
             spawnPointObj.transform.position = new Vector3(Mathf.Cos(angle) * r, Mathf.Sin(angle) * r, 0);
             spawnPoints[i] = spawnPointObj.transform;
             spawnPointObj.transform.parent = transform;
+        }
+    }
+    
+    /// <summary>
+    /// 更新动态避让系统
+    /// </summary>
+    private void Update()
+    {
+        if (enableDynamicAvoidance && activeEnemies.Count > 0)
+        {
+            // 定期更新网格以提高性能
+            if (Time.time - lastGridUpdateTime > gridUpdateInterval)
+            {
+                UpdateSpatialGrid();
+                lastGridUpdateTime = Time.time;
+            }
+            
+            // 计算避让力
+            CalculateAvoidanceForces();
+        }
+    }
+    
+    /// <summary>
+    /// 更新空间网格
+    /// </summary>
+    private void UpdateSpatialGrid()
+    {
+        // 清空网格
+        spatialGrid.Clear();
+        
+        // 重新分配敌人到网格
+        foreach (Enemy enemy in activeEnemies)
+        {
+            if (enemy != null && enemy.IsAlive)
+            {
+                AddEnemyToGrid(enemy);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 计算避让力
+    /// </summary>
+    private void CalculateAvoidanceForces()
+    {
+        enemyAvoidanceForces.Clear();
+        
+        foreach (Enemy enemy in activeEnemies)
+        {
+            if (enemy == null || !enemy.IsAlive) continue;
+            
+            Vector2 avoidanceForce = Vector2.zero;
+            Vector2Int enemyGrid = WorldToGrid(enemy.transform.position);
+            
+            // 检查周围9个网格
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    Vector2Int checkGrid = enemyGrid + new Vector2Int(dx, dy);
+                    
+                    if (spatialGrid.ContainsKey(checkGrid))
+                    {
+                        foreach (Enemy nearbyEnemy in spatialGrid[checkGrid])
+                        {
+                            if (nearbyEnemy == enemy || nearbyEnemy == null || !nearbyEnemy.IsAlive) continue;
+                            
+                            Vector2 direction = (Vector2)(enemy.transform.position - nearbyEnemy.transform.position);
+                            float distance = direction.magnitude;
+                            
+                            if (distance < avoidanceRadius && distance > 0.1f)
+                            {
+                                // 计算避让力 - 距离越近，力越大
+                                float forceMagnitude = avoidanceStrength * (1f - distance / avoidanceRadius);
+                                avoidanceForce += direction.normalized * forceMagnitude;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            enemyAvoidanceForces[enemy] = avoidanceForce;
+        }
+    }
+    
+    /// <summary>
+    /// 获取敌人的避让力
+    /// </summary>
+    public Vector2 GetAvoidanceForce(Enemy enemy)
+    {
+        if (enemyAvoidanceForces.ContainsKey(enemy))
+        {
+            return enemyAvoidanceForces[enemy];
+        }
+        return Vector2.zero;
+    }
+    
+    /// <summary>
+    /// 获取指定位置周围的敌人密度
+    /// </summary>
+    public float GetEnemyDensity(Vector3 position, float radius)
+    {
+        Vector2Int centerGrid = WorldToGrid(position);
+        int gridRadius = Mathf.CeilToInt(radius / gridSize);
+        int enemyCount = 0;
+        
+        for (int dx = -gridRadius; dx <= gridRadius; dx++)
+        {
+            for (int dy = -gridRadius; dy <= gridRadius; dy++)
+            {
+                Vector2Int checkGrid = centerGrid + new Vector2Int(dx, dy);
+                
+                if (spatialGrid.ContainsKey(checkGrid))
+                {
+                    enemyCount += spatialGrid[checkGrid].Count;
+                }
+            }
+        }
+        
+        float area = Mathf.PI * radius * radius;
+        return enemyCount / area;
+    }
+    
+    /// <summary>
+    /// 获取网格统计信息（用于调试）
+    /// </summary>
+    public void GetGridStats(out int totalGrids, out int occupiedGrids, out int totalEnemies)
+    {
+        totalGrids = spatialGrid.Count;
+        occupiedGrids = 0;
+        totalEnemies = 0;
+        
+        foreach (var kvp in spatialGrid)
+        {
+            if (kvp.Value.Count > 0)
+            {
+                occupiedGrids++;
+                totalEnemies += kvp.Value.Count;
+            }
         }
     }
 }

@@ -33,6 +33,8 @@ public class Enemy : BaseEntity
     public float attackCooldown = 2f;
     public float wanderRadius = 5f;
     public float wanderTimer = 5f;
+    public bool useAvoidance = true;           // 是否使用避让系统
+    public float avoidanceWeight = 0.3f;       // 避让力权重
     
     // 状态
     protected enum EnemyState
@@ -54,6 +56,10 @@ public class Enemy : BaseEntity
     protected Vector2 moveDirection;
     protected Vector2 wanderTarget;
     protected bool isPathfinding = false;
+    
+    // 避让系统
+    protected EnemyManager enemyManager;
+    protected Vector2 avoidanceForce = Vector2.zero;
     
     // 动画相关
     protected Animator animator;
@@ -97,6 +103,9 @@ public class Enemy : BaseEntity
             playerTransform = playerController.transform;
         }
         
+        // 查找敌人管理器
+        enemyManager = FindObjectOfType<EnemyManager>();
+        
         // 进入默认状态
         ChangeState(EnemyState.Idle);
     }
@@ -107,6 +116,12 @@ public class Enemy : BaseEntity
         
         // 更新状态效果
         UpdateStatusEffects();
+        
+        // 更新避让力
+        if (useAvoidance && enemyManager != null)
+        {
+            avoidanceForce = enemyManager.GetAvoidanceForce(this);
+        }
         
         // 执行当前状态的行为
         switch (currentState)
@@ -147,24 +162,50 @@ public class Enemy : BaseEntity
         // 如果被眩晕或正在攻击，不应用移动
         if (currentState == EnemyState.Stunned || currentState == EnemyState.Attacking) return;
         
+        // 计算最终移动方向（包含避让力）
+        Vector2 finalMoveDirection = CalculateFinalMoveDirection();
+        
         // 应用移动
-        if (moveDirection.magnitude > 0.1f)
+        if (finalMoveDirection.magnitude > 0.1f)
         {
             // 应用减速效果
             float currentMoveSpeed = moveSpeed * (1f - slowAmount);
             
             // 直接移动物体
-            Vector3 movement = new Vector3(moveDirection.x, moveDirection.y, 0) * currentMoveSpeed * Time.fixedDeltaTime;
+            Vector3 movement = new Vector3(finalMoveDirection.x, finalMoveDirection.y, 0) * currentMoveSpeed * Time.fixedDeltaTime;
             transform.position += movement;
             
             // 如果有x方向的移动，设置面向
-            if (Mathf.Abs(moveDirection.x) > 0.1f)
+            if (Mathf.Abs(finalMoveDirection.x) > 0.1f)
             {
                 Vector3 newScale = transform.localScale;
-                newScale.x = Mathf.Abs(newScale.x) * (moveDirection.x > 0 ? 1 : -1);
+                newScale.x = Mathf.Abs(newScale.x) * (finalMoveDirection.x > 0 ? 1 : -1);
                 transform.localScale = newScale;
             }
         }
+    }
+    
+    /// <summary>
+    /// 计算最终移动方向（包含避让力）
+    /// </summary>
+    protected virtual Vector2 CalculateFinalMoveDirection()
+    {
+        Vector2 finalDirection = moveDirection;
+        
+        // 应用避让力
+        if (useAvoidance && avoidanceForce.magnitude > 0.1f)
+        {
+            // 将避让力与原始移动方向结合
+            finalDirection += avoidanceForce * avoidanceWeight;
+            
+            // 标准化方向向量
+            if (finalDirection.magnitude > 0.1f)
+            {
+                finalDirection.Normalize();
+            }
+        }
+        
+        return finalDirection;
     }
     
     /// <summary>
@@ -876,3 +917,4 @@ public class Enemy : BaseEntity
         TakeDamage(value);
     }
 }
+

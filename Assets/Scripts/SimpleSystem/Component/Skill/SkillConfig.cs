@@ -58,6 +58,9 @@ namespace SimpleSystem{
         // 技能移动速度
         public float moveSpeed;
 
+        // 技能移动角度速度
+        public float augularSpeed;
+
         // 技能移动距离
         public float moveDistance;
 
