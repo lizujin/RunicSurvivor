@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.seanba.super-tiled2unity": "file:../ExtraPackage/com.seanba.super-tiled2unity",
     "com.unity.collab-proxy": "2.4.3",
     "com.unity.feature.2d": "2.0.1",
     "com.unity.feature.mobile": "1.0.0",

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="地块.tsx"/>
+ <tileset firstgid="8" source="beach.tsx"/>
+ <layer id="1" name="图块层 1" width="10" height="10">
+  <data encoding="csv">
+8,9,9,9,9,9,9,9,9,10,
+13,11,19,19,19,19,12,14,14,15,
+13,15,7,7,7,8,17,11,12,15,
+13,16,9,9,9,17,14,15,13,15,
+13,14,14,14,14,14,14,15,13,15,
+13,11,19,12,14,14,14,15,13,15,
+13,15,8,17,14,11,12,16,17,15,
+13,16,17,14,11,20,18,19,12,15,
+13,14,14,14,16,9,9,9,17,15,
+18,19,19,19,19,19,19,19,19,20
+</data>
+ </layer>
+</map>
