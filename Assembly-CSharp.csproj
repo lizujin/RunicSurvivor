@@ -115,6 +115,8 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\Resources\Image\mystic_woods_free_2.2\read_me.txt" />
+    <None Include="Assets\Resources\Image\mystic_woods_free_2.2\sprites\characters\README.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Resources\Image\Cute_Fantasy_Free\read_me.txt" />
     <None Include="Assets\Resources\Config\Skill\Skills.json" />
